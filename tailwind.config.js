@@ -12,6 +12,7 @@ export default {
         extend: {
             screens: {
                 "sm": { "max": "450px" },
+                "custom": { "max": "500px" },
                 "md": { "max": "768px" },
                 "lg": { "max": "1024px" },
                 "xl": { "max": "1366px" },

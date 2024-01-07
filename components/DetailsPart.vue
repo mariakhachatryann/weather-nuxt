@@ -1,7 +1,7 @@
 <template>
-    <NuxtLayout :name="layout">
+    <NuxtLayout name="block">
         <div class="bg-[#0000001a] p-2 w-full">
-            <div class="mb-2">
+            <div class="mb-2 cursor-pointer" @click="handleLocation(userLoc)">
                 <p v-if="userLoc" class="text-center text-xl">My Location: {{ userLoc.address.city ? userLoc.address.city :
                     userLoc.address.village }}/{{ userLoc.address.country }}</p>
                 <p v-else class="text-center">...</p>
@@ -13,15 +13,16 @@
             </div>
         </div>
         <div class="text-left py-[30px] px-5">
-            <div class="text-2xl font-normal">{{ location.location.name }}/{{ location.location.country }} </div>
-            <div>{{ location.location.localtime }}</div>
-            <div class="degree flex  gap-5">
+            <div class="text-2xl font-normal custom:text-center">{{ location.location.name }}/{{ location.location.country }} </div>
+            <div class="custom:text-center">{{ location.location.localtime }}</div>
+            <div class="flex gap-5 custom:justify-center">
                 <div class="text-[80px]">{{ location.current.temp_c }}<sup>o</sup>C</div>
                 <div class="forecast-icon">
+                    <!-- <img :src="location.current.condition.icon" /> -->
                     <component :is="getIconComponent(location.current.condition.icon)"></component>
                 </div>
             </div>
-            <div class="flex justify-between flex-row items-center">
+            <div class="flex justify-between flex-row items-center custom:flex-col">
                 <p class="text-xl">{{ location.current.condition.text }}</p>
                 <div class="flex items-center gap-2">
                     <IconsUmbrella />
@@ -41,9 +42,9 @@
 </template>
 
 <script setup>
-const layout = "block";
-
 const props = defineProps(["location"]);
+const emit = defineEmits(["findMyLoc"]);
+
 let { location } = props;
 import IconsSun from '~/components/Icons/Sun.vue';
 import IconsSunCloud from '~/components/Icons/SunCloud.vue';
@@ -52,6 +53,7 @@ import IconsClearNight from '~/components/Icons/ClearNight.vue';
 import IconsCloud from '~/components/Icons/Cloud.vue';
 import IconsRain from '~/components/Icons/Rain.vue';
 import NightCloud from './Icons/NightCloud.vue';
+import Mist from "./Icons/Mist.vue";
 
 const getIconComponent = (icon) => {
     if (icon.includes('113.png') && icon.includes('day')) {
@@ -66,8 +68,9 @@ const getIconComponent = (icon) => {
         return IconsCloud;
     } else if (icon.includes('116.png') && icon.includes('night')) {
         return NightCloud;
-    }
-    else if (icon.includes('311.png') || icon.includes('302.png') || icon.includes('296.png')) {
+    } else if (icon.includes('143.png')) {
+        return Mist;
+    } else if (icon.includes('311.png') || icon.includes('302.png') || icon.includes('296.png')) {
         return IconsRain;
     } else {
         return null;
@@ -76,13 +79,17 @@ const getIconComponent = (icon) => {
 
 const getDay = computed(() => {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-    return days[new Date().getDate()]
+    return days[new Date().getDay()]
 })
 
 const getDate = computed(() => {
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     return `${new Date().getDate()} ${months[new Date().getMonth()]}`
-})
+});
+
+function handleLocation(loc) {
+    emit("findMyLoc", loc)
+}
 
 const currentTime = ref(getCurrentTime());
 
