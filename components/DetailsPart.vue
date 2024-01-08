@@ -1,10 +1,10 @@
 <template>
     <NuxtLayout name="block">
         <div class="bg-[#0000001a] p-2 w-full">
-            <div class="mb-2 cursor-pointer" @click="handleLocation(userLoc)">
-                <p v-if="userLoc" class="text-center text-xl">My Location: {{ userLoc.address.city ? userLoc.address.city :
+            <div class="mb-2 cursor-pointer">
+                <p v-if="userLoc" @click="handleLocation(userLoc)" class="text-center text-xl">My Location: {{ userLoc.address.city ? userLoc.address.city :
                     userLoc.address.village }}/{{ userLoc.address.country }}</p>
-                <p v-else class="text-center">...</p>
+                <p v-else @click="getUserLocation" class="text-center text-lg">Get my location</p>
             </div>
             <div class="w-full flex justify-between">
                 <div class="text-lg">{{ getDate }}</div>
@@ -15,8 +15,8 @@
         <div class="text-left py-[30px] px-5">
             <div class="text-2xl font-normal custom:text-center">{{ location.location.name }}/{{ location.location.country }} </div>
             <div class="custom:text-center">{{ location.location.localtime }}</div>
-            <div class="flex gap-5 custom:justify-center">
-                <div class="text-[80px]">{{ location.current.temp_c }}<sup>o</sup>C</div>
+            <div class="flex gap-5 custom:justify-center custom:gap-0 mt-2">
+                <div class="text-[80px] custom:text-[50px]">{{ location.current.temp_c }}<sup>o</sup>C</div>
                 <div class="forecast-icon">
                     <!-- <img :src="location.current.condition.icon" /> -->
                     <component :is="getIconComponent(location.current.condition.icon)"></component>
@@ -107,47 +107,52 @@ setInterval(() => {
 
 let userLoc = ref()
 
-if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-       async (position) => {
-            const latitude = position.coords.latitude;
-            const longitude = position.coords.longitude;
-           await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.display_name) {
-                        console.log(data);
-                        userLoc.value = data
-                        // Use the address or other data as needed
-                    } else {
-                        console.error('No results found.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching location:', error);
-                });
-        },
-        (error) => {
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    console.error("User denied the request for Geolocation.");
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    console.error("Location information is unavailable.");
-                    break;
-                case error.TIMEOUT:
-                    console.error("The request to get user location timed out.");
-                    break;
-                case error.UNKNOWN_ERROR:
-                    console.error("An unknown error occurred.");
-                    break;
-                default:
-                    console.error("An error occurred:", error.message);
-            }
-        }
-    );
-} else {
-    console.error("Geolocation is not supported by this browser.");
+function getUserLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+           async (position) => {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+               await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.display_name) {
+                            console.log(data);
+                            userLoc.value = data
+                        } else {
+                            console.error('No results found.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching location:', error);
+                    });
+            },
+            // (error) => {
+            //     switch (error.code) {
+            //         case error.PERMISSION_DENIED:
+            //             console.error("User denied the request for Geolocation.");
+            //             break;
+            //         case error.POSITION_UNAVAILABLE:
+            //             console.error("Location information is unavailable.");
+            //             break;
+            //         case error.TIMEOUT:
+            //             console.error("The request to get user location timed out.");
+            //             break;
+            //         case error.UNKNOWN_ERROR:
+            //             console.error("An unknown error occurred.");
+            //             break;
+            //         default:
+            //             console.error("An error occurred:", error.message);
+            //     }
+            // }
+        );
+    } else {
+        console.error("Geolocation is not supported by this browser.");
+    }
 }
+
+// onMounted(() => {
+//     getUserLocation();
+// })
 </script>
 
